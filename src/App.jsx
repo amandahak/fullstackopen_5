@@ -129,6 +129,19 @@ const App = () => {
     </form>
   )
 
+  // Blogien poistaminen
+  const handleDelete = async (id) => {
+    try {
+      await blogService.remove(id)
+      setBlogs(blogs.filter((blog) => blog.id !== id))
+      setSuccessMessage('Blog removed successfully')
+      setTimeout(() => setSuccessMessage(null), 5000)
+    } catch (error) {
+      setErrorMessage('Failed to remove blog')
+      setTimeout(() => setErrorMessage(null), 5000)
+    }
+  }
+
   // Blogilista ja lomake (kirjautuneelle käyttäjälle)
   const blogList = () => (
     <div>
@@ -143,7 +156,13 @@ const App = () => {
         .slice()
         .sort((a, b) => b.likes - a.likes) // Järkätään likejen mukaisesti
         .map((blog) => (
-        <Blog key={blog.id} blog={blog} handleLike={handleLike} />
+          <Blog 
+          key={blog.id} 
+          blog={blog} 
+          handleLike={handleLike}
+          handleDelete={handleDelete}
+          loggedUser={user.username} 
+        />
       ))}
     </div>
   )

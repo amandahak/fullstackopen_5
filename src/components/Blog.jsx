@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const Blog = ({ blog, handleLike }) => {
+const Blog = ({ blog, handleLike, handleDelete, loggedUser }) => {
   const [visible, setVisible] = useState(false) // Tila näkyvyyden hallintaan
 
   // Tyylit
@@ -15,6 +15,12 @@ const Blog = ({ blog, handleLike }) => {
   // Näkyvyyden vaihtaminen
   const toggleVisibility = () => {
     setVisible(!visible)
+  }
+
+  const confirmDelete = () => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      handleDelete(blog.id)
+    }
   }
 
   return (
@@ -33,6 +39,11 @@ const Blog = ({ blog, handleLike }) => {
             <button onClick={() => handleLike(blog)}>like</button>
           </p>
           <p>Added by {blog.user?.name || blog.user?.username || 'Unknown'}</p>
+          {loggedUser === blog.user.username && (
+            <button onClick={confirmDelete} style={{ color: 'red'}}>
+              remove
+            </button>
+          )}
         </div>
       )}
     </div>
