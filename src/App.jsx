@@ -1,21 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
+import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [successMessage, setSuccessMessage] = useState(null) // Lisätty tila onnistumiseen
-  const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' })
+  const [blogs, setBlogs] = useState([]) // Blogien lista
+  const [user, setUser] = useState(null) // Kirjautunut käyttäjä
+  const [username, setUsername] = useState('') // Käyttäjänimi syötteessä
+  const [password, setPassword] = useState('') // Salasana syötteessä
+  const [errorMessage, setErrorMessage] = useState(null) // Virheviestit
+  const [successMessage, setSuccessMessage] = useState(null) // Onnistumisviestit
 
+  const blogFormRef = useRef()
+
+  // Haetaan blogit backendistä, kun komponentti renderöidään
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
+    blogService.getAll().then((blogs) => {
+      setBlogs(blogs)
+    })
   }, [])
 
+  // Tarkistetaan local storagessa oleva kirjautumistieto
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser')
     if (loggedUserJSON) {
@@ -25,6 +32,7 @@ const App = () => {
     }
   }, [])
 
+  // Kirjautumisen käsittelijä
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
@@ -40,23 +48,20 @@ const App = () => {
     }
   }
 
+  // Uloskirjautumisen käsittelijä
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBloglistUser')
     setUser(null)
     blogService.setToken(null)
   }
 
-  const handleNewBlogChange = ({ target }) => {
-    setNewBlog({ ...newBlog, [target.name]: target.value })
-  }
-
-  const addBlog = async (event) => {
-    event.preventDefault()
+  // Uuden blogin lisäämisen käsittelijä
+  const addBlog = async (newBlog) => {
     try {
+      blogFormRef.current.toggleVisibility() // Piilotetaan lomake
       const addedBlog = await blogService.create(newBlog)
       setBlogs(blogs.concat(addedBlog))
-      setNewBlog({ title: '', author: '', url: '' })
-      setSuccessMessage(`A new blog "${addedBlog.title}" by ${addedBlog.author} added`) // Onnistumisviesti
+      setSuccessMessage(`A new blog "${addedBlog.title}" by ${addedBlog.author} added`)
       setTimeout(() => setSuccessMessage(null), 5000)
     } catch (error) {
       setErrorMessage('Failed to add blog')
@@ -64,6 +69,7 @@ const App = () => {
     }
   }
 
+  // Kirjautumislomake
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
@@ -71,7 +77,6 @@ const App = () => {
         <input
           type="text"
           value={username}
-          name="Username"
           onChange={({ target }) => setUsername(target.value)}
         />
       </div>
@@ -80,7 +85,6 @@ const App = () => {
         <input
           type="password"
           value={password}
-          name="Password"
           onChange={({ target }) => setPassword(target.value)}
         />
       </div>
@@ -88,50 +92,19 @@ const App = () => {
     </form>
   )
 
-  const blogForm = () => (
-    <form onSubmit={addBlog}>
-      <div>
-        title:
-        <input
-          type="text"
-          name="title"
-          value={newBlog.title}
-          onChange={handleNewBlogChange}
-        />
-      </div>
-      <div>
-        author:
-        <input
-          type="text"
-          name="author"
-          value={newBlog.author}
-          onChange={handleNewBlogChange}
-        />
-      </div>
-      <div>
-        url:
-        <input
-          type="text"
-          name="url"
-          value={newBlog.url}
-          onChange={handleNewBlogChange}
-        />
-      </div>
-      <button type="submit">create</button>
-    </form>
-  )
-
+  // Blogilista ja lomake (kirjautuneelle käyttäjälle)
   const blogList = () => (
     <div>
       <p>
-        {user.name} logged in
-        <button onClick={handleLogout}>logout</button>
+        {user.name} logged in <button onClick={handleLogout}>logout</button>
       </p>
+      <Togglable buttonLabel="new note" ref={blogFormRef}>
+        <BlogForm createBlog={addBlog} />
+      </Togglable>
       <h2>blogs</h2>
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
       ))}
-      {blogForm()}
     </div>
   )
 
@@ -146,4 +119,3 @@ const App = () => {
 }
 
 export default App
-
