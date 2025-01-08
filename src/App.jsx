@@ -18,6 +18,7 @@ const App = () => {
   // Haetaan blogit backendistä, kun komponentti renderöidään
   useEffect(() => {
     blogService.getAll().then((blogs) => {
+      console.log('Fetched blogs from backend:', blogs)
       setBlogs(blogs)
     })
   }, [])
@@ -27,6 +28,7 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
+      console.log('Logged in user from localStorage:', user)
       setUser(user)
       blogService.setToken(user.token)
     }
@@ -37,12 +39,14 @@ const App = () => {
     event.preventDefault()
     try {
       const user = await loginService.login({ username, password })
+      console.log('User logged in:', user)
       window.localStorage.setItem('loggedBloglistUser', JSON.stringify(user))
       blogService.setToken(user.token)
       setUser(user)
       setUsername('')
       setPassword('')
     } catch (error) {
+      console.error('Login error:', error)
       setErrorMessage('Wrong username or password')
       setTimeout(() => setErrorMessage(null), 5000)
     }
@@ -50,6 +54,7 @@ const App = () => {
 
   // Uloskirjautumisen käsittelijä
   const handleLogout = () => {
+    console.log('Logging out user')
     window.localStorage.removeItem('loggedBloglistUser')
     setUser(null)
     blogService.setToken(null)
@@ -60,11 +65,43 @@ const App = () => {
     try {
       blogFormRef.current.toggleVisibility() // Piilotetaan lomake
       const addedBlog = await blogService.create(newBlog)
-      setBlogs(blogs.concat(addedBlog))
+      console.log('New blog added:', addedBlog)
+
+      // Lisätään uusi blogi frontendin tilaan
+      const blogWithUser = addedBlog.user
+        ? addedBlog
+        : { ...addedBlog, user: { username: user.username, name: user.name } }
+      console.log('New blog with user details:', blogWithUser)
+
+      setBlogs(blogs.concat(blogWithUser))
       setSuccessMessage(`A new blog "${addedBlog.title}" by ${addedBlog.author} added`)
       setTimeout(() => setSuccessMessage(null), 5000)
     } catch (error) {
+      console.error('Error adding blog:', error)
       setErrorMessage('Failed to add blog')
+      setTimeout(() => setErrorMessage(null), 5000)
+    }
+  }
+
+  // Like-painikkeen käsittelijä
+  const handleLike = async (blog) => {
+    try {
+      console.log('Liking blog:', blog)
+      const updatedBlog = {
+        ...blog,
+        likes: blog.likes + 1,
+        user: blog.user.id || blog.user, // Jos user on objekti, käytetään ID:tä
+      }
+      const returnedBlog = await blogService.update(blog.id, updatedBlog)
+      console.log('Updated blog after like:', returnedBlog)
+
+      const updatedBlogWithUser = { ...returnedBlog, user: blog.user }
+      setBlogs(blogs.map((b) => (b.id === blog.id ? updatedBlogWithUser : b)))
+      setSuccessMessage(`You liked "${returnedBlog.title}"`)
+      setTimeout(() => setSuccessMessage(null), 5000)
+    } catch (error) {
+      console.error('Error liking blog:', error)
+      setErrorMessage('Failed to like the blog')
       setTimeout(() => setErrorMessage(null), 5000)
     }
   }
@@ -103,7 +140,7 @@ const App = () => {
       </Togglable>
       <h2>blogs</h2>
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} handleLike={handleLike} />
       ))}
     </div>
   )
