@@ -5,9 +5,17 @@ const BlogForm = ({ createBlog }) => {
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
-  const handleSubmit = (event) => {
+  const handleCreateBlog = (event) => {
     event.preventDefault()
-    createBlog({ title, author, url })
+
+    // Kutsutaan App-komponentista saatua createBlog-funktiota
+    createBlog({
+      title,
+      author,
+      url,
+    })
+
+    // Tyhjennetään lomakkeen kentät
     setTitle('')
     setAuthor('')
     setUrl('')
@@ -15,10 +23,10 @@ const BlogForm = ({ createBlog }) => {
 
   return (
     <div>
-      <h2>Create new</h2>
-      <form onSubmit={handleSubmit}>
+      <h2>Create a new blog</h2>
+      <form onSubmit={handleCreateBlog}>
         <div>
-          title
+          Title:
           <input
             type="text"
             value={title}
@@ -26,7 +34,7 @@ const BlogForm = ({ createBlog }) => {
           />
         </div>
         <div>
-          author
+          Author:
           <input
             type="text"
             value={author}
@@ -34,14 +42,14 @@ const BlogForm = ({ createBlog }) => {
           />
         </div>
         <div>
-          url
+          URL:
           <input
             type="text"
             value={url}
             onChange={({ target }) => setUrl(target.value)}
           />
         </div>
-        <button type="submit">create</button>
+        <button type="submit">Create</button>
       </form>
     </div>
   )
