@@ -4,32 +4,61 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]) // Blogilista
-  const [username, setUsername] = useState('') // Kirjautumislomakkeen käyttäjänimi
-  const [password, setPassword] = useState('') // Kirjautumislomakkeen salasana
-  const [user, setUser] = useState(null) // Kirjautuneen käyttäjän tiedot
-  const [errorMessage, setErrorMessage] = useState(null) // Virheiden näyttäminen
+  // Tilat
+  const [blogs, setBlogs] = useState([])
+  const [user, setUser] = useState(null)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [errorMessage, setErrorMessage] = useState(null)
 
-  // Haetaan blogit backendistä
+  // Haetaan blogit sovelluksen käynnistyessä
   useEffect(() => {
-    blogService.getAll().then(blogs => setBlogs(blogs))
+    blogService.getAll().then((blogs) => setBlogs(blogs))
   }, [])
 
-  // Käsittele kirjautuminen
-  const handleLogin = async event => {
+  // Tarkistetaan kirjautumistiedot local storagesta
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBloglistUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user) // Asetetaan käyttäjä tilaan
+      blogService.setToken(user.token) // Asetetaan token palvelulle
+    }
+  }, [])
+
+  const handleLogin = async (event) => {
     event.preventDefault()
     try {
+      console.log('Attempting login with:', username, password)
       const user = await loginService.login({ username, password })
-      setUser(user) // Asetetaan käyttäjän tiedot
-      setUsername('') // Tyhjennetään lomake
+      console.log('Login response:', user)
+  
+      if (!user.token) {
+        throw new Error('Token missing in response')
+      }
+  
+      window.localStorage.setItem('loggedBloglistUser', JSON.stringify(user))
+      blogService.setToken(user.token)
+      setUser(user)
+      setUsername('')
       setPassword('')
-    } catch (exception) {
-      setErrorMessage('Invalid username or password')
+      console.log('User successfully logged in and state updated:', user)
+    } catch (error) {
+      console.error('Login failed:', error.message)
+      setErrorMessage('Wrong username or password')
       setTimeout(() => setErrorMessage(null), 5000)
     }
   }
+  
 
-  // Kirjautumislomake
+  // Uloskirjautumisen käsittelijä
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedBloglistUser') // Poistetaan kirjautumistiedot
+    setUser(null) // Nollataan käyttäjä tila
+    blogService.setToken(null) // Nollataan token
+  }
+
+  // Lomakkeen ja listauksen ehdollinen renderöinti
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
@@ -37,6 +66,7 @@ const App = () => {
         <input
           type="text"
           value={username}
+          name="Username"
           onChange={({ target }) => setUsername(target.value)}
         />
       </div>
@@ -45,6 +75,7 @@ const App = () => {
         <input
           type="password"
           value={password}
+          name="Password"
           onChange={({ target }) => setPassword(target.value)}
         />
       </div>
@@ -52,22 +83,24 @@ const App = () => {
     </form>
   )
 
+  const blogList = () => (
+    <div>
+      <p>
+        {user.name} logged in
+        <button onClick={handleLogout}>logout</button>
+      </p>
+      <h2>blogs</h2>
+      {blogs.map((blog) => (
+        <Blog key={blog.id} blog={blog} />
+      ))}
+    </div>
+  )
+
   return (
     <div>
-      <h2>blogs</h2>
+      <h1>Bloglist</h1>
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-
-      {/* Näytetään kirjautumislomake, jos käyttäjä ei ole kirjautunut */}
-      {user === null ? (
-        loginForm()
-      ) : (
-        <div>
-          <p>{user.name} logged in</p>
-          {blogs.map(blog => (
-            <Blog key={blog.id} blog={blog} />
-          ))}
-        </div>
-      )}
+      {user === null ? loginForm() : blogList()}
     </div>
   )
 }
