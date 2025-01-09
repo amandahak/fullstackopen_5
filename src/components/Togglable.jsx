@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import { useState, forwardRef, useImperativeHandle } from 'react'
 
 const Togglable = forwardRef(({ buttonLabel, children }, ref) => {
@@ -24,5 +25,14 @@ const Togglable = forwardRef(({ buttonLabel, children }, ref) => {
     </div>
   )
 })
+
+// Lisätään PropTypes-määrittelyt
+Togglable.propTypes = {
+  buttonLabel: PropTypes.string.isRequired, // Varmistetaan, että buttonLabel on pakollinen ja tyyppi string
+  children: PropTypes.node.isRequired, // Varmistetaan, että children on React-node ja pakollinen
+}
+
+// Lisätään komponentille displayName (React Developer Toolsia varten)
+Togglable.displayName = 'Togglable'
 
 export default Togglable

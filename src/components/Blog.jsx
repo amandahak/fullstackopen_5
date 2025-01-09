@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import PropTypes from 'prop-types'
 
 const Blog = ({ blog, handleLike, handleDelete, loggedUser }) => {
   const [visible, setVisible] = useState(false) // Tila näkyvyyden hallintaan
@@ -40,7 +41,7 @@ const Blog = ({ blog, handleLike, handleDelete, loggedUser }) => {
           </p>
           <p>Added by {blog.user?.name || blog.user?.username || 'Unknown'}</p>
           {loggedUser === blog.user.username && (
-            <button onClick={confirmDelete} style={{ color: 'red'}}>
+            <button onClick={confirmDelete} style={{ color: 'red' }}>
               remove
             </button>
           )}
@@ -48,6 +49,24 @@ const Blog = ({ blog, handleLike, handleDelete, loggedUser }) => {
       )}
     </div>
   )
+}
+
+// PropTypes -määrittelyt
+Blog.propTypes = {
+  blog: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    author: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+    likes: PropTypes.number.isRequired,
+    user: PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      username: PropTypes.string
+    })
+  }).isRequired,
+  handleLike: PropTypes.func.isRequired,
+  handleDelete: PropTypes.func.isRequired
 }
 
 export default Blog

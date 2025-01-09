@@ -4,6 +4,7 @@ import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import LoginForm from './components/LoginForm'
 
 const App = () => {
   const [blogs, setBlogs] = useState([]) // Blogien lista
@@ -108,25 +109,13 @@ const App = () => {
 
   // Kirjautumislomake
   const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        username
-        <input
-          type="text"
-          value={username}
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          type="password"
-          value={password}
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>
+    <LoginForm
+      handleSubmit={handleLogin}
+      handleUsernameChange={({ target }) => setUsername(target.value)}
+      handlePasswordChange={({ target }) => setPassword(target.value)}
+      username={username}
+      password={password}
+    />
   )
 
   // Blogien poistaminen
@@ -156,14 +145,14 @@ const App = () => {
         .slice()
         .sort((a, b) => b.likes - a.likes) // Järkätään likejen mukaisesti
         .map((blog) => (
-          <Blog 
-          key={blog.id} 
-          blog={blog} 
-          handleLike={handleLike}
-          handleDelete={handleDelete}
-          loggedUser={user.username} 
-        />
-      ))}
+          <Blog
+            key={blog.id}
+            blog={blog}
+            handleLike={handleLike}
+            handleDelete={handleDelete}
+            loggedUser={user.username}
+          />
+        ))}
     </div>
   )
 
