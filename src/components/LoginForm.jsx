@@ -17,6 +17,7 @@ const LoginForm = ({
             type="text"
             value={username}
             name="Username"
+            aria-label="username" //playwrightiä varten
             onChange={handleUsernameChange}
           />
         </div>
@@ -26,10 +27,12 @@ const LoginForm = ({
             type="password"
             value={password}
             name="Password"
+            aria-label='password' //playwrightiä varten
             onChange={handlePasswordChange}
           />
         </div>
-        <button type="submit">login</button>
+        <button 
+            type="submit">login</button>
       </form>
     </div>
   )

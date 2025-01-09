@@ -159,8 +159,8 @@ const App = () => {
   return (
     <div>
       <h1>Bloglist</h1>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+      {errorMessage && <p className="error" style={{ color: 'red' }}>{errorMessage}</p>}
+      {successMessage && <p className="success" style={{ color: 'green' }}>{successMessage}</p>}
       {user === null ? loginForm() : blogList()}
     </div>
   )
