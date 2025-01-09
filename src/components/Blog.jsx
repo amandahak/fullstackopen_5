@@ -25,23 +25,23 @@ const Blog = ({ blog, handleLike, handleDelete, loggedUser }) => {
   }
 
   return (
-    <div style={blogStyle}>
-      <div>
+    <div style={blogStyle} className="blog">
+      <div className="blogTitleAuthor">
         {blog.title} {blog.author}{' '}
-        <button onClick={toggleVisibility}>
+        <button onClick={toggleVisibility} className="viewButton">
           {visible ? 'hide' : 'view'}
         </button>
       </div>
       {visible && (
-        <div>
-          <p>{blog.url}</p>
-          <p>
+        <div className="blogDetails">
+          <p className="blogUrl">{blog.url}</p>
+          <p className="blogLikes">
             likes {blog.likes}{' '}
-            <button onClick={() => handleLike(blog)}>like</button>
+            <button onClick={() => handleLike(blog)} className="likeButton">like</button>
           </p>
           <p>Added by {blog.user?.name || blog.user?.username || 'Unknown'}</p>
-          {loggedUser === blog.user.username && (
-            <button onClick={confirmDelete} style={{ color: 'red' }}>
+          {loggedUser === blog.user?.username && (
+            <button onClick={confirmDelete} style={{ color: 'red' }} className="deleteButton">
               remove
             </button>
           )}
@@ -62,11 +62,12 @@ Blog.propTypes = {
     user: PropTypes.shape({
       id: PropTypes.string,
       name: PropTypes.string,
-      username: PropTypes.string
-    })
+      username: PropTypes.string,
+    }),
   }).isRequired,
   handleLike: PropTypes.func.isRequired,
-  handleDelete: PropTypes.func.isRequired
+  handleDelete: PropTypes.func.isRequired,
+  loggedUser: PropTypes.string.isRequired,
 }
 
 export default Blog

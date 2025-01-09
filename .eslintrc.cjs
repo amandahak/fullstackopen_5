@@ -3,13 +3,14 @@ module.exports = {
   env: {
     browser: true,
     es2020: true,
-    node: true,
+    "vitest-globals/env": true, // Vitestin globaalit avainsanat
   },
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
+    'plugin:vitest-globals/recommended',
   ],
   parserOptions: {
     ecmaVersion: 'latest',
@@ -17,11 +18,10 @@ module.exports = {
   },
   settings: {
     react: {
-      version: 'detect', // Automaattisesti tunnistaa käyttämäsi React-version
+      version: 'detect', // Automaattisesti tunnistaa React-version
     },
   },
-  ignorePatterns: ['node_modules', 'dist', '.eslintrc.cjs'],
-  plugins: ['react-refresh'],
+  ignorePatterns: ['node_modules', 'dist'],
   rules: {
     // Tyylisäännöt
     'indent': ['error', 2], // Kahden välilyönnin sisennys
@@ -38,7 +38,7 @@ module.exports = {
     'no-console': 0, // Sallitaan console.log-debuggaukset
 
     // React-säännöt
-    'react/react-in-jsx-scope': 'off', // Ei tarvita Reactin importtausta (Vite ja JSX-runtime hoitaa tän)
+    'react/react-in-jsx-scope': 'off', // Ei tarvita Reactin importtausta (JSX-runtime hoitaa tämän)
     'react/prop-types': 'off', // PropTypes käytön voi ohittaa (esim. TypeScriptin käyttöön)
     'react-hooks/rules-of-hooks': 'error', // React-hooksien sääntöjen tarkistus
     'react-hooks/exhaustive-deps': 'warn', // Huomauta puuttuvista riippuvuuksista
